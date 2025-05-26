@@ -9,7 +9,7 @@ You can annotate event "segments" with start & end times or event "points" that 
 More detailed tutorial is available [here](https://towardsdatascience.com/how-to-use-vest-a-free-online-tool-for-segmenting-video-clips-a6ec50e29971?sk=2065cb12567832eef625bbba810543b6). 
 
 ### 1. Installation  
-Easiest way to use VEST is through the online app at [https://jinhyuncheong.com/vest/vest.html](https://jinhyuncheong.com/vest/vest.html). Alternatively, you can clone this repo and launch `index.html` in your browser. 
+The easiest way to use this verion of vest is to clone the repo and launch `index.html` in your browser. 
 
 ### 2. How to use
 - Load your video file using the [Choose file] button
