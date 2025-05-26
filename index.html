@@ -2,8 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Video Event Pointing Tool</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <title>Video Event Segmentation Tool</title>
     <style>
       body {
         font-family: "Clear Sans", "Helvetica neue", Helvetica, Arial,
@@ -263,6 +262,11 @@
         border-radius: 4px;
         opacity: 95%;
       }
+
+      #watched-time-container {
+        margin: 8px 0;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -286,7 +290,7 @@
           </button>
         </div>
 
-        <div id="title">VIDEO EVENT POINTING TOOL</div>
+        <div id="title">VIDEO EVENT SEGMENTATION TOOL</div>
         <div id="menu">
           <button
             id="help-button"
@@ -344,12 +348,12 @@
 
           <div id="helpContent">
             <p>
-              The Video Event Pointing Tool (VEPT) is an open-source software
-              for annotating temporal events in video clips.
+              The Video Event Segmentation Tool (VEST) is an open-source
+              software for annotating temporal events in video clips.
             </p>
             <p>
-              You can annotate event "points" that indicate only the start time
-              of an event.
+              You can annotate event "segments" with start & end times or event
+              "points" that indicate only the start time of an event.
             </p>
             <h3>Basic instructions</h3>
             <ol>
@@ -358,8 +362,15 @@
               </li>
               <li>
                 <p>
-                  Add Point to annotate events as you watch your video with
-                  specific annotation.
+                  Define the name of the event segments and points using the
+                  [Add segment buttons] and [Add point buttons]. This will
+                  create buttons with your event names on them.
+                </p>
+              </li>
+              <li>
+                <p>
+                  Click your label buttons to annotate segments or events as you
+                  watch your video.
                 </p>
               </li>
               <li>
@@ -369,10 +380,16 @@
                 </p>
               </li>
             </ol>
+            <h3>Feedback</h3>
+            <p>
+              Please leave feedback in the
+              <a href="https://github.com/jcheong0428/vest">Github repository</a
+              >.
+            </p>
 
             <h3>Privacy & security</h3>
             <p>
-              When using VEPT, your videos and annotations are processed in your
+              When using VEST, your videos and annotations are processed in your
               browser. This means your videos and annotations are just as
               private as being on your own laptop. This also means that you will
               lose any video and annotation progress when you close your
@@ -381,7 +398,7 @@
 
             <h3>Licenses</h3>
             <p>
-              VEPT uses
+              VEST uses
               <a href="https://github.com/bbc/peaks.js">peaks.js</a> and adheres
               to its
               <a href="https://github.com/bbc/peaks.js/blob/master/COPYING"
@@ -393,6 +410,22 @@
         </div>
       </div>
 
+      <div id="myModalPoint" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <p>Please enter the name of the point.</p>
+          <label for="lname">Point ID: </label>
+          <input type="text" id="new-button-text-point" /><br /><br />
+          <input
+            class="button-30"
+            type="submit"
+            value="Create point button"
+            onclick="submitButtonPoint()"
+          />
+        </div>
+      </div>
+
       <div id="demo-controls">
         <audio id="audio" class="audio" controls="controls">
           <source src="" type="audio/mpeg" />
@@ -401,20 +434,31 @@
       </div>
       <div class="sidenav">
         <div id="controls">
-          <label class="button-30" for="point-label">Label</label>
-          <select name="point-label" id="point-label">
-            <option value="Suspect escalation">Suspect escalation</option>
-            <option value="Officer escalation">Officer escalation</option>
-            <option value="Suspect deescalation">Suspect deescalation</option>
-            <option value="Officer deescalation">Officer deescalation</option>
-            <option value="Force">Force</option>
-            <option value="Resisting arrest">Resisting arrest</option>
-            <option value="Arrest made">Arrest made</option>
-          </select>
-          <br />
-          <button class="button-30 topbutton" onclick="submitPoint()">
-            Add point
+          <div class="">
+            <label class="button-30" for="seg-label">Label</label>
+            <select name="seg-label" id="seg-label">
+              <option value="Suspect escalation">Suspect escalation</option>
+              <option value="Officer escalation">Officer escalation</option>
+              <option value="Suspect deescalation">Suspect deescalation</option>
+              <option value="Officer deescalation">Officer deescalation</option>
+              <option value="Force">Force</option>
+              <option value="Resisting arrest">Resisting arrest</option>
+              <option value="Arrest made">Arrest made</option>
+            </select>
+            <br />
+            <button
+              class="button-30 topbutton"
+              id="add-button"
+              onclick="submitSegment()"
+            >
+              Add segment
+            </button>
+          </div>
+          <controlDivider></controlDivider>
+          <button class="button-30 topbutton" onclick="addButtonPoint()">
+            Add point buttons
           </button>
+          <div id="point-buttons"></div>
           <controlDivider></controlDivider>
           <button class="button-30" data-action="zoom-in">Zoom in</button>
           <button class="button-30" data-action="zoom-out">Zoom out</button>
@@ -432,18 +476,41 @@
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </select>
-          <div id="watched-time-container" style="display: none">
+          <div id="watched-time-container">
             <label for="watched-time">Watched time</label>
-            <input type="text" id="watched-time" style="width: 5em" />
+            <input
+              type="text"
+              id="watched-time"
+              value="0.0"
+              style="width: 5em"
+            />
           </div>
           <controlDivider></controlDivider>
-          <button class="button-30" data-action="log-data">Log points</button>
+          <button class="button-30" data-action="log-data">
+            Log segments & points
+          </button>
           <button class="button-30" data-action="download">
             Download results
           </button>
         </div>
       </div>
       <div class="log">
+        <div id="segments" class="hide">
+          <h2>Segments</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Label</th>
+                <th>Start time</th>
+                <th>End time</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
         <div id="points" class="hide">
           <h2>Points</h2>
           <table>
@@ -464,6 +531,53 @@
     <script src="peaks.js"></script>
     <script>
       (function (Peaks) {
+        var renderSegments = function (peaks) {
+          var segmentsContainer = document.getElementById("segments");
+          var segments = peaks.segments.getSegments();
+          var html = "";
+
+          for (var i = 0; i < segments.length; i++) {
+            var segment = segments[i];
+
+            var row =
+              "<tr>" +
+              "<td>" +
+              segment.id +
+              "</td>" +
+              "<td>" +
+              segment.labelText +
+              "</td>" +
+              "<td>" +
+              segment.startTime +
+              "</td>" +
+              "<td>" +
+              segment.endTime +
+              "</td>" +
+              "<td>" +
+              '<a href="#' +
+              segment.id +
+              '" data-action="play-segment" data-id="' +
+              segment.id +
+              '">Play</a>' +
+              "</td>" +
+              "<td>" +
+              '<a href="#' +
+              segment.id +
+              '" data-action="remove-segment" data-id="' +
+              segment.id +
+              '">Remove</a>' +
+              "</td>" +
+              "</tr>";
+            html += row;
+          }
+
+          segmentsContainer.querySelector("tbody").innerHTML = html;
+
+          if (html.length) {
+            segmentsContainer.classList.remove("hide");
+          }
+        };
+
         var renderPoints = function (peaks) {
           var pointsContainer = document.getElementById("points");
           var points = peaks.points.getPoints();
@@ -538,6 +652,7 @@
         peak = Peaks.init(options, function (err, peaksInstance) {
           window.peakVars = {
             peaksInstance: peaksInstance,
+            renderSegments: renderSegments,
             renderPoints: renderPoints,
           };
 
@@ -560,9 +675,42 @@
               peaksInstance.zoom.zoomOut();
             });
 
+          var matches = document.querySelectorAll(
+            'button[data-action="add-segment"]'
+          );
+          [].forEach.call(matches, function (match) {
+            // add eventlistner to each button.
+            match.addEventListener("click", function () {
+              startTime = peaksInstance.player.getCurrentTime();
+              peaksInstance.segments.add({
+                startTime: startTime,
+                endTime: startTime + 3,
+                labelText: this.innerHTML,
+                editable: true,
+              });
+              renderSegments(peaksInstance);
+            });
+          });
+
+          var matches2 = document.querySelectorAll(
+            'button[data-action="add-point"]'
+          );
+          [].forEach.call(matches2, function (match2) {
+            // add eventlistner to each button.
+            match2.addEventListener("click", function () {
+              peaksInstance.points.add({
+                time: peaksInstance.player.getCurrentTime(),
+                labelText: this.innerHTML,
+                editable: true,
+              });
+              renderPoints(peaksInstance);
+            });
+          });
+
           document
             .querySelector('button[data-action="log-data"]')
             .addEventListener("click", function (event) {
+              renderSegments(peaksInstance);
               renderPoints(peaksInstance);
             });
 
@@ -595,8 +743,19 @@
           document
             .querySelector('button[data-action="download"]')
             .addEventListener("click", function (event) {
-              // TODO: Download all the point results.
+              // TODO: Download all the segmentation and point results.
               console.log("Downloading");
+              segments = peaksInstance.segments.getSegments();
+              let toSave = {};
+              segments.forEach((obj) => {
+                toSave[obj._id] = {
+                  startTime: obj._startTime,
+                  endTime: obj._endTime,
+                  id: obj._id,
+                  labelText: obj._labelText,
+                };
+              });
+
               // Save points
               points = peaksInstance.points.getPoints();
               let toSavePoints = {};
@@ -608,11 +767,11 @@
                 };
               });
               var blob = new Blob(
-                [JSON.stringify(toSavePoints)],
+                [JSON.stringify(toSave), "\n", JSON.stringify(toSavePoints)],
                 { type: "application/json" }
               );
               var saveAs = window.saveAs;
-              saveAs(blob, "pointing_results.json");
+              saveAs(blob, "segmentation_results.json");
             });
 
           document
@@ -622,8 +781,18 @@
               var action = element.getAttribute("data-action");
               var id = element.getAttribute("data-id");
 
-              if (action === "remove-point") {
+              if (action === "play-segment") {
+                var segment = peaksInstance.segments.getSegment(id);
+                peaksInstance.player.playSegment(segment);
+                vid.currentTime = peaksInstance.player.getCurrentTime();
+                vid.play();
+              } else if (action === "remove-point") {
                 peaksInstance.points.removeById(id);
+                renderSegments(peaksInstance);
+                renderPoints(peaksInstance);
+              } else if (action === "remove-segment") {
+                peaksInstance.segments.removeById(id);
+                renderSegments(peaksInstance);
                 renderPoints(peaksInstance);
               }
             });
@@ -681,15 +850,15 @@
           var vid = document.getElementById("video");
           vid.defaultMuted = true;
 
-          peaksInstance.on("player_play", function (seek) {
+          peaksInstance.on("player_play", function (segment) {
             vid.currentTime = peaksInstance.player.getCurrentTime();
             vid.play();
           });
-          peaksInstance.on("player_pause", function (seek) {
+          peaksInstance.on("player_pause", function (segment) {
             vid.currentTime = peaksInstance.player.getCurrentTime();
             vid.pause();
           });
-          peaksInstance.on("player_seek", function (seek) {
+          peaksInstance.on("player_seek", function (segment) {
             vid.currentTime = peaksInstance.player.getCurrentTime();
           });
 
@@ -711,11 +880,21 @@
         modal.style.display = "block";
       }
 
+      function addButtonPoint() {
+        document.getElementById("new-button-text-point").value = "";
+        // Get the modal
+        var modal = document.getElementById("myModalPoint");
+        modal.style.display = "block";
+      }
+
       // Get the modal
+      var modal = document.getElementById("myModal");
+      var modalPoint = document.getElementById("myModalPoint");
       var helpModal = document.getElementById("helpModal");
 
       // Get the <span> element that closes the modal
       var span = document.getElementsByClassName("close")[0];
+      var span2 = document.getElementsByClassName("close")[1];
 
       // When the user clicks on <span> (x), close the modal
       span.onclick = function () {
@@ -723,41 +902,81 @@
         modalPoint.style.display = "none";
         helpModal.style.display = "none";
       };
+      span2.onclick = function () {
+        modal.style.display = "none";
+        modalPoint.style.display = "none";
+        helpModal.style.display = "none";
+      };
       // When the user clicks anywhere outside of the modal, close it
       window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+        if (event.target == modalPoint) {
+          modalPoint.style.display = "none";
+        }
         if (event.target == helpModal) {
           helpModal.style.display = "none";
         }
       };
 
       // Submit Point button
-      function submitPoint() {
-        labelText = document.getElementById(`point-label`).value;
-        window.peakVars.peaksInstance.points.add({
-          time: window.peakVars.peaksInstance.player.getCurrentTime(),
-          labelText: labelText,
-          editable: true,
+      function submitButtonPoint() {
+        let btn = document.createElement("button");
+        var buttonValue = document.getElementById(
+          "new-button-text-point"
+        ).value;
+        btn.innerHTML = buttonValue;
+        btn.classList.add("button-30");
+        $(btn).attr("data-action", "add-point");
+        // add eventlistner to each button.
+        btn.addEventListener("click", function () {
+          window.peakVars.peaksInstance.points.add({
+            time: window.peakVars.peaksInstance.player.getCurrentTime(),
+            labelText: this.innerHTML,
+            editable: true,
+          });
+          window.peakVars.renderPoints(window.peakVars.peaksInstance);
         });
-        window.peakVars.renderPoints(window.peakVars.peaksInstance);
-      }
 
+        document.getElementById("point-buttons").appendChild(btn);
+        var br = document.createElement("br");
+        document.getElementById("point-buttons").appendChild(br);
+        modalPoint.style.display = "none";
+      }
+      // https://stackoverflow.com/questions/36035721/how-can-i-set-preview-of-video-file-selecting-from-input-type-file/40580663
       $("#video_input").change(function () {
         var fileInput = document.getElementById("video_input");
         var fileUrl = window.URL.createObjectURL(fileInput.files[0]);
+        window?.peakVars?.peaksInstance?.segments.removeAll();
         window?.peakVars?.peaksInstance?.points.removeAll();
-        window?.peakVars?.renderPoints(window?.peakVars?.peaksInstance);
+        window?.peakVars?.renderSegments(window?.peakVars?.peaksInstance);
         $(".video").attr("src", fileUrl);
         $(".audio").attr("src", fileUrl);
       });
+      // $ ("#audio_input").change(function () {
+      //    var fileInput = document.getElementById('audio_input');
+      //    var fileUrl = window.URL.createObjectURL(fileInput.files[0]);
+      //    $(".audio").attr("src", fileUrl);
+      // });
+      function submitSegment() {
+        const seg_label = document.getElementById("seg-label").value;
+        startTime = window.peakVars.peaksInstance.player.getCurrentTime();
+        window.peakVars.peaksInstance.segments.add({
+          startTime: startTime,
+          endTime: startTime + 3,
+          labelText: seg_label,
+          editable: true,
+        });
+        window.peakVars.renderSegments(window.peakVars.peaksInstance);
+      }
 
       function changeWatched() {
-        if (document.getElementById("watched").value == "no") {
+        if (document.getElementById("watched").value == "no")
           document
             .getElementById("watched-time-container")
             .setAttribute("style", "display: block");
-          document.getElementById("watched-time").value =
-            window.peakVars.peaksInstance.player.getCurrentTime();
-        } else
+        else
           document
             .getElementById("watched-time-container")
             .setAttribute("style", "display: none");
