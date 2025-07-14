@@ -441,7 +441,10 @@
               <option value="Officer escalation">Officer escalation</option>
               <option value="Suspect deescalation">Suspect deescalation</option>
               <option value="Officer deescalation">Officer deescalation</option>
-              <option value="Force">Force</option>
+	      <option value="Suspect nonlethal force">Suspect nonlethal force</option>
+	      <option value="Suspect lethal force">Suspect lethal force</option>
+	      <option value="Officer nonlethal force">Officer nonlethal force</option>
+	      <option value="Officer lethal force">Officer lethal force</option>
               <option value="Resisting arrest">Resisting arrest</option>
               <option value="Arrest made">Arrest made</option>
             </select>
@@ -454,11 +457,24 @@
               Add segment
             </button>
           </div>
-          <controlDivider></controlDivider>
-          <button class="button-30 topbutton" onclick="addButtonPoint()">
-            Add point buttons
-          </button>
-          <div id="point-buttons"></div>
+	
+	  <controlDivider></controlDivider>
+	  <label class="button-30" for="point-label">Point Label</label>
+	  <select name="point-label" id="point-label">
+              <option value="Suspect escalation">Suspect escalation</option>
+              <option value="Officer escalation">Officer escalation</option>
+              <option value="Suspect deescalation">Suspect deescalation</option>
+              <option value="Officer deescalation">Officer deescalation</option>
+	      <option value="Suspect nonlethal force">Suspect nonlethal force</option>
+	      <option value="Suspect lethal force">Suspect lethal force</option>
+	      <option value="Officer nonlethal force">Officer nonlethal force</option>
+	      <option value="Officer lethal force">Officer lethal force</option>
+              <option value="Resisting arrest">Resisting arrest</option>
+              <option value="Arrest made">Arrest made</option>
+	  </select>
+	  <br />
+	  <button class="button-30 topbutton" onclick="submitPoint()">Add point</button>
+
           <controlDivider></controlDivider>
           <button class="button-30" data-action="zoom-in">Zoom in</button>
           <button class="button-30" data-action="zoom-out">Zoom out</button>
@@ -971,6 +987,16 @@
         window.peakVars.renderSegments(window.peakVars.peaksInstance);
       }
 
+      function submitPoint() {
+	    const point_label = document.getElementById("point-label").value;
+	    window.peakVars.peaksInstance.points.add({
+	    time: window.peakVars.peaksInstance.player.getCurrentTime(),
+	    labelText: point_label,
+	    editable: true,
+	    });
+	    window.peakVars.renderPoints(window.peakVars.peaksInstance);
+	    }
+    
       function changeWatched() {
         if (document.getElementById("watched").value == "no")
           document
