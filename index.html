@@ -787,7 +787,13 @@
                 { type: "application/json" }
               );
               var saveAs = window.saveAs;
-              saveAs(blob, "segmentation_results.json");
+              // Extract original filename without extension
+		var fileInput = document.getElementById("video_input");
+		var originalName = fileInput.files.length
+		    ? fileInput.files[0].name.replace(/\.[^/.]+$/, "")
+		    : "segmentation_results";
+		
+		saveAs(blob, `${originalName}.json`);
             });
 
           document
